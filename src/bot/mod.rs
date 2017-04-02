@@ -36,8 +36,8 @@ impl Bot {
             if key == "hub.challenge" {
                 println!("hub.challenge received");
                 hub_challenge = Some(value.into_owned());
-            } else if key == "webhook_verify_token" && value == self.webhook_verify_token {
-                println!("verify token passed");
+            } else if key == "hub.verify_token" && value == self.webhook_verify_token {
+                println!("hub.verify_token passed");
                 webhook_verify_token = true;
             }
         }
