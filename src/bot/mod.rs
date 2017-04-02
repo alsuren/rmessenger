@@ -1,5 +1,6 @@
 extern crate futures;
 extern crate hyper;
+extern crate hyper_tls;
 extern crate url;
 
 mod utils;
@@ -8,6 +9,7 @@ use self::url::form_urlencoded;
 
 #[derive(Clone)]
 pub struct Bot {
+    client: hyper::Client<hyper_tls::HttpsConnector>,
     access_token: String,
     app_secret: String,
     webhook_verify_token: String,
@@ -15,12 +17,17 @@ pub struct Bot {
 }
 
 impl Bot {
-    pub fn new(access_token: &str, app_secret: &str, webhook_verify_token: &str) -> Bot {
+    pub fn new(client: hyper::Client<hyper_tls::HttpsConnector>,
+               access_token: &str,
+               app_secret: &str,
+               webhook_verify_token: &str)
+               -> Bot {
         Bot {
             access_token: access_token.to_string(),
             app_secret: app_secret.to_string(),
             webhook_verify_token: webhook_verify_token.to_string(),
             graph_url: "https://graph.facebook.com/v2.7".to_string(),
+            client: client,
         }
     }
 
@@ -49,7 +56,7 @@ impl Bot {
     }
 
     /// send text messages to the specified recipient.
-    pub fn send_text_message(self,
+    pub fn send_text_message(&self,
                              recipient_id: &str,
                              message: &str)
                              -> Box<Future<Item = String, Error = hyper::Error>> {
@@ -65,7 +72,7 @@ impl Bot {
     }
 
     /// send generic message to the specified recipient.
-    pub fn send_generic_message(self,
+    pub fn send_generic_message(&self,
                                 recipient_id: &str,
                                 elements: &str)
                                 -> Box<Future<Item = String, Error = hyper::Error>> {
@@ -89,7 +96,7 @@ impl Bot {
     }
 
     /// send button message to the specified recipient.
-    pub fn send_button_message(self,
+    pub fn send_button_message(&self,
                                recipient_id: &str,
                                text: &str,
                                buttons: &str)
@@ -116,7 +123,7 @@ impl Bot {
     }
 
     /// send file url to the specified recipient.
-    pub fn send_file_url(self,
+    pub fn send_file_url(&self,
                          recipient_id: &str,
                          file_url: &str)
                          -> Box<Future<Item = String, Error = hyper::Error>> {
@@ -139,7 +146,7 @@ impl Bot {
     }
 
     /// send audio url to the specified recipient.
-    pub fn send_audio_url(self,
+    pub fn send_audio_url(&self,
                           recipient_id: &str,
                           audio_url: &str)
                           -> Box<Future<Item = String, Error = hyper::Error>> {
@@ -162,12 +169,12 @@ impl Bot {
     }
 
     /// send payload.
-    fn send_raw(self, payload: String) -> Box<Future<Item = String, Error = hyper::Error>> {
+    fn send_raw(&self, payload: String) -> Box<Future<Item = String, Error = hyper::Error>> {
         let request_endpoint = format!("{}{}", self.graph_url, "/me/messages");
         let url_request = utils::UrlRequest::new();
 
         let data = format!("{}{}", "access_token=", self.access_token).to_string();
 
-        url_request.post(request_endpoint, data, payload)
+        url_request.post(self.client.clone(), request_endpoint, data, payload)
     }
 }
