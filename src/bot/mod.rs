@@ -4,17 +4,20 @@ extern crate hyper;
 mod utils;
 use self::futures::future::Future;
 
+#[derive(Clone)]
 pub struct Bot {
     access_token: String,
     app_secret: String,
+    webhook_verify_token: String,
     graph_url: String,
 }
 
 impl Bot {
-    pub fn new(access_token: &str, app_secret: &str) -> Bot {
+    pub fn new(access_token: &str, app_secret: &str, webhook_verify_token: &str) -> Bot {
         Bot {
             access_token: access_token.to_string(),
             app_secret: app_secret.to_string(),
+            webhook_verify_token: webhook_verify_token.to_string(),
             graph_url: "https://graph.facebook.com/v2.7".to_string(),
         }
     }
