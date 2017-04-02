@@ -1,8 +1,10 @@
 extern crate futures;
 extern crate hyper;
+extern crate url;
 
 mod utils;
 use self::futures::future::Future;
+use self::url::form_urlencoded;
 
 #[derive(Clone)]
 pub struct Bot {
@@ -19,6 +21,30 @@ impl Bot {
             app_secret: app_secret.to_string(),
             webhook_verify_token: webhook_verify_token.to_string(),
             graph_url: "https://graph.facebook.com/v2.7".to_string(),
+        }
+    }
+
+    /// Verify the Get query (after the ?) of a webhook verification request
+    /// (see https://developers.facebook.com/docs/graph-api/webhooks#setup)
+    /// and return either Some(hub.challenge) for you to put in the body of your
+    /// response, or None.
+    pub fn verify_webhook_query(&self, query: &str) -> Option<String> {
+        let mut hub_challenge = None;
+        let mut webhook_verify_token = false;
+
+        for (key, value) in form_urlencoded::parse(query.as_bytes()) {
+            if key == "hub.challenge" {
+                println!("hub.challenge received");
+                hub_challenge = Some(value.into_owned());
+            } else if key == "webhook_verify_token" && value == self.webhook_verify_token {
+                println!("verify token passed");
+                webhook_verify_token = true;
+            }
+        }
+        if webhook_verify_token {
+            return hub_challenge;
+        } else {
+            return None;
         }
     }
 
