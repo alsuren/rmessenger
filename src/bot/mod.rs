@@ -9,7 +9,7 @@ use self::url::form_urlencoded;
 
 #[derive(Clone)]
 pub struct Bot {
-    client: hyper::Client<hyper_tls::HttpsConnector>,
+    client: hyper::Client<hyper_tls::HttpsConnector<hyper::client::HttpConnector>>,
     access_token: String,
     app_secret: String,
     webhook_verify_token: String,
@@ -17,11 +17,12 @@ pub struct Bot {
 }
 
 impl Bot {
-    pub fn new(client: hyper::Client<hyper_tls::HttpsConnector>,
-               access_token: &str,
-               app_secret: &str,
-               webhook_verify_token: &str)
-               -> Bot {
+    pub fn new(
+        client: hyper::Client<hyper_tls::HttpsConnector<hyper::client::HttpConnector>>,
+        access_token: &str,
+        app_secret: &str,
+        webhook_verify_token: &str,
+    ) -> Bot {
         Bot {
             access_token: access_token.to_string(),
             app_secret: app_secret.to_string(),
@@ -56,27 +57,31 @@ impl Bot {
     }
 
     /// send text messages to the specified recipient.
-    pub fn send_text_message(&self,
-                             recipient_id: &str,
-                             message: &str)
-                             -> Box<Future<Item = String, Error = hyper::Error>> {
-        let payload = format!("
+    pub fn send_text_message(
+        &self,
+        recipient_id: &str,
+        message: &str,
+    ) -> Box<Future<Item = String, Error = hyper::Error>> {
+        let payload = format!(
+            "
                               {{
                                  'recipient': {{'id': {} }},
                                  'message': {{'text': '{}'}}
                               }}",
-                              recipient_id,
-                              message);
+            recipient_id, message
+        );
 
         self.send_raw(payload.to_string())
     }
 
     /// send generic message to the specified recipient.
-    pub fn send_generic_message(&self,
-                                recipient_id: &str,
-                                elements: &str)
-                                -> Box<Future<Item = String, Error = hyper::Error>> {
-        let payload = format!("
+    pub fn send_generic_message(
+        &self,
+        recipient_id: &str,
+        elements: &str,
+    ) -> Box<Future<Item = String, Error = hyper::Error>> {
+        let payload = format!(
+            "
                               {{
                                 'recipient': {{'id': {} }},
                                 'message': {{
@@ -89,19 +94,21 @@ impl Bot {
                                   }}
                                 }}
                               }}",
-                              recipient_id,
-                              elements);
+            recipient_id, elements
+        );
 
         self.send_raw(payload.to_string())
     }
 
     /// send button message to the specified recipient.
-    pub fn send_button_message(&self,
-                               recipient_id: &str,
-                               text: &str,
-                               buttons: &str)
-                               -> Box<Future<Item = String, Error = hyper::Error>> {
-        let payload = format!("
+    pub fn send_button_message(
+        &self,
+        recipient_id: &str,
+        text: &str,
+        buttons: &str,
+    ) -> Box<Future<Item = String, Error = hyper::Error>> {
+        let payload = format!(
+            "
                               {{
                                 'recipient': {{'id': {} }},
                                 'message': {{
@@ -115,19 +122,20 @@ impl Bot {
                                   }}
                                 }}
                               }}",
-                              recipient_id,
-                              text,
-                              buttons);
+            recipient_id, text, buttons
+        );
 
         self.send_raw(payload.to_string())
     }
 
     /// send file url to the specified recipient.
-    pub fn send_file_url(&self,
-                         recipient_id: &str,
-                         file_url: &str)
-                         -> Box<Future<Item = String, Error = hyper::Error>> {
-        let payload = format!("
+    pub fn send_file_url(
+        &self,
+        recipient_id: &str,
+        file_url: &str,
+    ) -> Box<Future<Item = String, Error = hyper::Error>> {
+        let payload = format!(
+            "
                               {{
                                 'recipient': {{'id': {} }},
                                 'message': {{
@@ -139,18 +147,20 @@ impl Bot {
                                   }}
                                 }}
                               }}",
-                              recipient_id,
-                              file_url);
+            recipient_id, file_url
+        );
 
         self.send_raw(payload.to_string())
     }
 
     /// send audio url to the specified recipient.
-    pub fn send_audio_url(&self,
-                          recipient_id: &str,
-                          audio_url: &str)
-                          -> Box<Future<Item = String, Error = hyper::Error>> {
-        let payload = format!("
+    pub fn send_audio_url(
+        &self,
+        recipient_id: &str,
+        audio_url: &str,
+    ) -> Box<Future<Item = String, Error = hyper::Error>> {
+        let payload = format!(
+            "
                               {{
                                 'recipient': {{'id': {} }},
                                 'message': {{
@@ -162,8 +172,8 @@ impl Bot {
                                   }}
                                 }}
                               }}",
-                              recipient_id,
-                              audio_url);
+            recipient_id, audio_url
+        );
 
         self.send_raw(payload.to_string())
     }
