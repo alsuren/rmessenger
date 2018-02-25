@@ -1,12 +1,11 @@
 extern crate futures;
 extern crate hyper;
 extern crate hyper_tls;
-extern crate tokio_core;
 extern crate pretty_env_logger;
 extern crate rmessenger;
+extern crate tokio_core;
 
 use std::env;
-
 
 fn main() {
     pretty_env_logger::init().unwrap();
@@ -33,14 +32,15 @@ fn main() {
     let mut core = tokio_core::reactor::Core::new().unwrap();
     let handle = core.handle();
     let client = hyper::Client::configure()
-        .connector(hyper_tls::HttpsConnector::new(4, &handle))
+        .connector(hyper_tls::HttpsConnector::new(4, &handle).unwrap())
         .build(&handle);
 
-
-    let bot = rmessenger::bot::Bot::new(client.clone(),
-                                        &access_token,
-                                        &app_secret,
-                                        &webhook_verify_token);
+    let bot = rmessenger::bot::Bot::new(
+        client.clone(),
+        &access_token,
+        &app_secret,
+        &webhook_verify_token,
+    );
 
     let message_promise = bot.send_text_message(&recipient, &text);
 
