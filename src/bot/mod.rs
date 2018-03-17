@@ -41,6 +41,7 @@ impl Bot {
         let mut webhook_verify_token = false;
 
         for (key, value) in form_urlencoded::parse(query.as_bytes()) {
+            println!("verifying {} = {}", key, value);
             if key == "hub.challenge" {
                 println!("hub.challenge received");
                 maybe_hub_challenge = Some(value.into_owned());
